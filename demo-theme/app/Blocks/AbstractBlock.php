@@ -3,6 +3,7 @@
 namespace App\Blocks;
 
 use function App\asset_path;
+use WordPlate\Acf\Location;
 
 abstract class AbstractBlock
 {
@@ -33,6 +34,8 @@ abstract class AbstractBlock
                 ]
             ],
         ]);
+
+        $this->registerAcfBlockFields();
     }
 
     abstract protected function labels(): array;
@@ -50,4 +53,25 @@ abstract class AbstractBlock
             ['block' => $block]
         );
     }
+
+    protected function registerAcfBlockFields(): void
+    {
+        $fields = wp_parse_args($this, [
+            'title' => $this->name,
+            'fields' => $this->fields(),
+            'location' => $this->location(),
+            'hide_on_screen' => '',
+        ]);
+
+        register_extended_field_group($fields);
+    }
+
+    public function location(): array
+    {
+        return [
+            Location::if('block', 'acf/' . $this->name)
+        ];
+    }
+
+    abstract protected function fields(): array;
 }
